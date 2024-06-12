@@ -17,8 +17,8 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions    = <<DEFINITION
   [
     {
-      "name"      : "nginx",
-      "image"     : "nginx:1.23.1",
+      "name"      : "zivver-repo",
+      "image"     : "zivver-repo:latest",
       "cpu"       : 512,
       "memory"    : 2048,
       "essential" : true,
