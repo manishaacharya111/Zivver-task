@@ -1,25 +1,30 @@
 pipeline {
     agent any
-
+    
+    environment {
+        ecrRegistryCredential = 'ecr:ap-south-1:terraform-new'
+        registryURI =   "637423474653.dkr.ecr.ap-south-1.amazonaws.com/zivver-repo"
+        vprofileRegistry = "https://637423474653.dkr.ecr.ap-south-1.amazonaws.com"
+    }
     stages {
-        stage('SCM Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/manishaacharya111/Zivver-task.git'
-            }
-        }
-        
-        stage('build Image') {
-            steps {
-                dir('version-server-html') {
-                sh 'docker build -t zivver_page .'
+        stage('Build App Image') {
+            steps{
+                script{
+                    dockerImage = docker.build(registryURI + ":$BUILD_NUMBER", "./version-server-html")
                 }
             }
         }
-        stage('Run container') {
-            steps {
-                sh 'docker run -d --name zivver-container -p 8000:8080 zivver_page'
-            }
-        }
-    }
-}
-
+        
+        // Upload docker image to ECR
+    stage('Upload App Image') {
+            steps{
+                script {
+                    docker.withRegistry( vprofileRegistry, ecrRegistryCredential) {
+                    dockerImage.push ("$BUILD_NUMBER")
+                    dockerImage.push('latest')
+                    }
+                }
+            }   
+        } 
+    } 
+} 
